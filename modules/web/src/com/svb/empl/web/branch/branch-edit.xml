@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd" caption="msg://editorCaption" focusComponent="form"
+        messagesPack="com.svb.empl.web.branch">
+    <data>
+        <instance id="branchDc"
+                  class="com.svb.empl.entity.Branch"
+                  view="branch-view">
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="600" width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="branchDc" width="100%">
+            <vbox id="branchinfo"  width="100%">
+                <textField id="orgnameField" property="orgname" caption="msg://orgname"
+                           dataContainer="branchDc" width="100%"/>
+                <textField id="nameField" property="name" caption="msg://branchname"
+                           dataContainer="branchDc" width="100%"/>
+                <textField id="countryField" property="country" caption="msg://country"
+                           dataContainer="branchDc" width="100%"/>
+                <textField id="mainofficeField" property="mainoffice" caption="msg://mainoffice"
+                           dataContainer="branchDc" width="100%"/>
+                <textField id="numberField" property="number" caption="msg://number"
+                           dataContainer="branchDc" width="100%"/>
+                <textField id="regnumberField" property="regnumber" caption="msg://regnumber"
+                           dataContainer="branchDc" width="100%"/>
+                <textField id="codeField" property="code" caption="msg://code"
+                           dataContainer="branchDc" width="100%"/>
+                <textField id="bikField" property="bik" caption="msg://bik"
+                           dataContainer="branchDc" width="100%"/>
+                <textField id="regcodeField" property="regcode" caption="msg://regcode"
+                           dataContainer="branchDc" width="100%"/>
+            </vbox>
+        </form>
+        <hbox id="editActions" spacing="true" width="160px" margin="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

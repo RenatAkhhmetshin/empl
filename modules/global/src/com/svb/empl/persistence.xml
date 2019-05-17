@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
+    <persistence-unit name="empl" transaction-type="RESOURCE_LOCAL">
+
+        <class>com.svb.empl.entity.Post</class>
+        <class>com.svb.empl.entity.Branch</class>
+        <class>com.svb.empl.entity.OrgUnit</class>
+        <class>com.svb.empl.entity.Empl</class>
+        <class>com.svb.empl.entity.TehEmpl</class>
+    </persistence-unit>
+</persistence>

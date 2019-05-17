@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd" caption="msg://editorCaption" focusComponent="form"
+        messagesPack="com.svb.empl.web.empl">
+    <data>
+        <instance id="emplDc" class="com.svb.empl.entity.Empl" view="empl-view">
+            <loader/>
+            <collection id="orgunitsDc" property="orgunits"/>
+        </instance>
+        <collection id="orgUnitsDs1" class="com.svb.empl.entity.OrgUnit" view="orgUnit-view"/>
+    </data>
+    <dialogMode height="600" width="800"/>
+    <layout expand="scrollBox" spacing="true">
+        <scrollBox id="scrollBox" spacing="true">
+            <form id="form" dataContainer="emplDc" width="100%">
+                <split orientation="horizontal" width="100%" pos="12">
+                    <vbox spacing="true" margin="true">
+                        <image id="photo" scaleMode="CONTAIN" height="160px" width="160px"/>
+                    </vbox>
+                    <vbox margin="true" spacing="true">
+                        <label id="fio" width="100%" stylename=" bold h1 colored" dataContainer="emplDc"
+                               property="user.name"/>
+                        <label id="post" width="100%" stylename="bold" dataContainer="emplDc" property="user.position"/>
+                        <tree id="orgUnitsTree" caption="msg://orgunitsTree" enable="false" width="100%" height="90px"
+                              dataContainer="orgUnitsDs1" stylename="bold h1" hierarchyProperty="parent">
+                            <treechildren captionProperty="fullname"/>
+                        </tree>
+                        <label id="chief" dataContainer="emplDc" property="chief" stylename="h3 colored bold"
+                               width="100%" description="msg://chief"/>
+                    </vbox>
+                </split>
+                <vbox margin="true" spacing="true">
+                    <split id="split" orientation="horizontal" width="100%">
+                        <vbox margin="true" spacing="true" stylename="well">
+                            <label stylename="bold" value="msg://ContactIfo" width="100%"/>
+                            <textField id="phone" caption="msg://phone" dataContainer="emplDc" editable="false"
+                                       property="phone" width="100%"/>
+                            <textField id="extphone" caption="msg://extphone" dataContainer="emplDc" editable="false"
+                                       property="extphone" width="100%"/>
+                            <textField id="email" caption="msg://email" dataContainer="emplDc" property="user.email"
+                                       width="100%"/>
+                            <link id ="idlink" caption="Link"  target="_blank"/>
+                        </vbox>
+                        <vbox caption="msg://Placement" margin="true" spacing="true" stylename="well">
+                            <label stylename="bold" value="msg://Placement" width="100%"/>
+                            <textField id="city" caption="msg://city" dataContainer="emplDc" editable="false"
+                                       property="city" width="100%"/>
+                            <textField id="office" caption="msg://office" dataContainer="emplDc" editable="false"
+                                       property="office" width="100%"/>
+                            <textField id="branchname" caption="msg://branchname" dataContainer="emplDc"
+                                       property="branch.name" editable="false" width="100%"/>
+                        </vbox>
+                    </split>
+                </vbox>
+            </form>
+        </scrollBox>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowCommit"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

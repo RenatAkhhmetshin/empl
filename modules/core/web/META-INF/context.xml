@@ -1,0 +1,29 @@
+<Context>
+
+    <!-- Database connection -->
+    <Resource
+      name="jdbc/CubaDS"
+      type="javax.sql.DataSource"
+      maxTotal="20"
+      maxIdle="2"
+      maxWaitMillis="5000"
+      driverClassName="oracle.jdbc.OracleDriver"
+      url="jdbc:oracle:thin:@//m4000a:1521/FSSPTEST"
+      username="empl"
+      password="cuba"
+      cubaDbHost="m4000a:1521"
+      cubaDbName="FSSPTEST"/>
+
+    <!-- Switch off session serialization -->
+    <Manager pathname=""/>
+    <!--<Resource driverClassName="org.hsqldb.jdbc.JDBCDriver"
+          maxIdle="2"
+          maxTotal="20"
+          maxWaitMillis="5000"
+          name="jdbc/CubaDS"
+          password=""
+          type="javax.sql.DataSource"
+          url="jdbc:hsqldb:hsql://localhost:9010/empl"
+          username="sa"/>-->
+
+</Context>

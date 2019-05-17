@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.svb.empl.web.post">
+    <data>
+        <instance id="postDc"
+                  class="com.svb.empl.entity.Post"
+                  view="post-view">
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="postDc">
+            <column width="250px">
+                <textField id="codeField" property="code" caption="msg://code"/>
+                <textField id="nameField" property="name"/>
+                <textField id="extidField" property="extid"/>
+
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

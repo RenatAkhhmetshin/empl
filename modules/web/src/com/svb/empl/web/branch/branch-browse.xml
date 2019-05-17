@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="branchesTable"
+        messagesPack="com.svb.empl.web.branch">
+    <data readOnly="true">
+        <collection id="branchesDc"
+                    class="com.svb.empl.entity.Branch"
+                    view="branch-view">
+            <loader id="branchesDl">
+                <query>
+                    <![CDATA[select e from empl_Branch e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="branchesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="branchesTable"
+                dataLoader="branchesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="branchesTable"
+                    width="100%"
+                    dataContainer="branchesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+                <action id="refresh" type="refresh"/>
+            </actions>
+            <columns>
+                <column id="orgname" caption="msg://orgname"/>
+                <column id="name" caption="msg://branchname"/>
+                <column id="country" caption="msg://country"/>
+                <column id="mainoffice" caption="msg://mainoffice"/>
+                <column id="number" caption="msg://number"/>
+                <column id="regnumber" caption="msg://regnumber"/>
+                <column id="code" caption="msg://code"/>
+                <column id="bik" caption="msg://bik"/>
+                <column id="regcode" caption="msg://regcode"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="branchesTable.create"/>
+                <button id="editBtn" action="branchesTable.edit"/>
+                <button id="removeBtn" action="branchesTable.remove"/>
+                <button id="refreshBtn" action="branchesTable.refresh"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

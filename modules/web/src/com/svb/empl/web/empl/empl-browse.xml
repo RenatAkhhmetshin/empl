@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd" caption="msg://browseCaption"
+        focusComponent="emplsTable" messagesPack="com.svb.empl.web.empl">
+    <data readOnly="true">
+        <collection id="emplsDc" class="com.svb.empl.entity.Empl" view="empl-view">
+            <loader id="emplsDl">
+                <query><![CDATA[select e from empl_Empl e]]></query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600" width="800"/>
+    <layout expand="emplsTable" spacing="true">
+        <filter id="filter" applyTo="emplsTable" dataLoader="emplsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="emplsTable" width="100%" dataContainer="emplsDc" multiselect="true" presentations="true">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+                <action id="add" type="add"/>
+                <action id="excel" type="excel"/>
+            </actions>
+            <columns>
+                <column id="photo" caption="msg://photo"/>
+                <column id="user.name" caption="msg://fullname"/>
+                <column id="city" caption="msg://city"/>
+                <column id="branch.name" caption="msg://branchname"/>
+                <column id="office" caption="msg://office"/>
+                <column id="phone" caption="msg://phone"/>
+                <column id="birthdate" caption="msg://birthDate"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel" alwaysVisible="true">
+                <button id="createBtn" action="emplsTable.create"/>
+                <button id="editBtn" action="emplsTable.edit"/>
+                <button id="removeBtn" action="emplsTable.remove"/>
+                <button id="addBtn" action="emplsTable.add"/>
+                <button id="excelBtn" action="emplsTable.excel"/>
+                <button id="rubService" caption="msg://runService" icon="font-icon:CC"/>
+
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="orgUnitsTable"
+        messagesPack="com.svb.empl.web.orgunit">
+    <data readOnly="true">
+        <collection id="orgUnitsDc"
+                    class="com.svb.empl.entity.OrgUnit"
+                    view="orgUnit-view">
+            <loader id="orgUnitsDl">
+                <query>
+                    <![CDATA[select e from empl_OrgUnit e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="orgUnitsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="orgUnitsTable"
+                dataLoader="orgUnitsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="orgUnitsTable"
+                    width="100%"
+                    dataContainer="orgUnitsDc"
+                    multiselect="true"
+                    presentations="true">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+                <action id="refresh" type="refresh"/>
+                <action id="excel" type="excel"/>
+            </actions>
+            <columns>
+                <column id="extid"/>
+                <column id="fullname"/>
+                <column id="shortname"/>
+                <column id="parent"/>
+                <column id="typeid"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="orgUnitsTable.create"/>
+                <button id="editBtn" action="orgUnitsTable.edit"/>
+                <button id="removeBtn" action="orgUnitsTable.remove"/>
+                <button id="refreshBtn" action="orgUnitsTable.refresh"/>
+                <button id="excelBtn" action="orgUnitsTable.excel"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

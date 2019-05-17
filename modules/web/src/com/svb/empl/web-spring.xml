@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:gui="http://schemas.haulmont.com/cuba/spring/cuba-gui.xsd">
+
+    <!-- Annotation-based beans -->
+    <context:component-scan base-package="com.svb.empl"/>
+    
+    <gui:screens base-packages="com.svb.empl.web"/>
+    <bean class="com.haulmont.cuba.web.sys.remoting.WebRemoteProxyBeanCreator">
+        <property name="remoteServices">
+            <map>
+                <entry key="empl_DominoService" value="com.svb.empl.service.DominoService"/>
+                <entry key="empl_UserService" value="com.svb.empl.service.UserService"/>
+            </map>
+        </property>
+    </bean>
+
+</beans>

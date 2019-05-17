@@ -1,0 +1,2 @@
+alter table EMPL_TEH_EMPL_POST_LINK add constraint FK_TEHEMPPOS_ON_TEH_EMPL foreign key (TEH_EMPL_ID) references EMPL_TEH_EMPL(ID)^
+alter table EMPL_TEH_EMPL_POST_LINK add constraint FK_TEHEMPPOS_ON_POST foreign key (POST_ID) references EMPL_POST(ID)^

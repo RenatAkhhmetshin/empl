@@ -1,0 +1,2 @@
+alter table EMPL_EMPL_ORG_UNIT_LINK add constraint FK_EMPORGUNI_ON_EMPL foreign key (EMPL_ID) references EMPL_EMPL(ID)^
+alter table EMPL_EMPL_ORG_UNIT_LINK add constraint FK_EMPORGUNI_ON_ORG_UNIT foreign key (ORG_UNIT_ID) references EMPL_ORG_UNIT(ID)^
