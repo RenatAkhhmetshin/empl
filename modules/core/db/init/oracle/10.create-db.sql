@@ -63,10 +63,11 @@ create table EMPL_EMPL (
     ROOM varchar2(255 char),
     BIRTHDATE date,
     CHIEF_ID varchar2(32),
-    TECH_ID varchar2(32),
     SEX varchar2(50 char),
     PHOTO_ID varchar2(32),
     POSTPATH varchar2(255 char),
+    TABNUMBER varchar2(40 char),
+    EXTID varchar2(50 char),
     --
     primary key (ID)
 )^

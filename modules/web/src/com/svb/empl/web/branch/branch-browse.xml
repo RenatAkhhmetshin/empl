@@ -9,7 +9,7 @@
                     view="branch-view">
             <loader id="branchesDl">
                 <query>
-                    <![CDATA[select e from empl_Branch e]]>
+                    <![CDATA[select e from empl_branch e]]>
                 </query>
             </loader>
         </collection>

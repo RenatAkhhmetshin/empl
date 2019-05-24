@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd" caption="msg://editorCaption" focusComponent="form"
         messagesPack="com.svb.empl.web.empl">
     <data>
-        <instance id="emplDc" class="com.svb.empl.entity.Empl" view="empl-view">
+        <instance id="emplDc" class="com.svb.empl.entity.Empl" view="empl-view_1">
             <loader/>
             <collection id="orgunitsDc" property="orgunits"/>
         </instance>
@@ -16,16 +16,14 @@
                     <vbox spacing="true" margin="true">
                         <image id="photo" scaleMode="CONTAIN" height="160px" width="160px"/>
                     </vbox>
-                    <vbox margin="true" spacing="true">
+                    <vbox id = "staffVbox" margin="true" spacing="true">
                         <label id="fio" width="100%" stylename=" bold h1 colored" dataContainer="emplDc"
                                property="user.name"/>
                         <label id="post" width="100%" stylename="bold" dataContainer="emplDc" property="user.position"/>
-                        <tree id="orgUnitsTree" caption="msg://orgunitsTree" enable="false" width="100%" height="90px"
+                        <tree id="orgUnitsTree" enable="false" width="100%" height="90px"
                               dataContainer="orgUnitsDs1" stylename="bold h1" hierarchyProperty="parent">
                             <treechildren captionProperty="fullname"/>
                         </tree>
-                        <label id="chief" dataContainer="emplDc" property="chief" stylename="h3 colored bold"
-                               width="100%" description="msg://chief"/>
                     </vbox>
                 </split>
                 <vbox margin="true" spacing="true">
@@ -38,7 +36,7 @@
                                        property="extphone" width="100%"/>
                             <textField id="email" caption="msg://email" dataContainer="emplDc" property="user.email"
                                        width="100%"/>
-                            <link id ="idlink" caption="Link"  target="_blank"/>
+
                         </vbox>
                         <vbox caption="msg://Placement" margin="true" spacing="true" stylename="well">
                             <label stylename="bold" value="msg://Placement" width="100%"/>

@@ -5,6 +5,7 @@ package com.svb.empl.service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.haulmont.cuba.core.Persistence;
+import com.haulmont.cuba.core.TransactionalDataManager;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.security.entity.Group;
@@ -16,6 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import retrofit.*;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -34,8 +36,6 @@ import java.util.concurrent.TimeUnit;
 public class DominoServiceBean implements DominoService {
 	private static Logger logger = LoggerFactory.getLogger(DominoServiceBean.class);
 	
-	@Inject
-	private UserService userService;
 	
 	@Inject
 	private Persistence persistence;
@@ -61,8 +61,13 @@ public class DominoServiceBean implements DominoService {
 	
 	private CommitContext commitContext;
 	
+	@Inject
+	private TransactionalDataManager txDataManager;
 	
 	private ArrayList<Empl> processedLogins;
+	
+	@Inject
+	private EmplService emplService;
 	
 	@Override
 	public void getDominoEmployees() {
@@ -268,6 +273,8 @@ public class DominoServiceBean implements DominoService {
 	 * @author adms-Ahmetshin-RM
 	 */
 	@Override
+	
+	
 	public void createEmployees() {
 		try {
 			String authToken = this.getAuthToken();
@@ -316,6 +323,7 @@ public class DominoServiceBean implements DominoService {
 						logger.info("Need create new employee: "+ userLogin);
 						empl = this.createEmpl(employee);
 						dataManager.commit(empl);
+						
 						
 					}
 				}
@@ -453,6 +461,9 @@ public class DominoServiceBean implements DominoService {
 		empl.setPhone(employee.getPlacement().getPhone());
 		empl.setOffice(employee.getPlacement().getOffice());
 		empl.setNotesname(employee.getCommonDatas().getNotesName());
+		empl.setTabnumber(employee.getStaffDatas().getTabNumber());
+		empl.setExtid(employee.getCommonDatas().getExtID());
+		
 		Sex sex = Sex.fromId(employee.getCommonDatas().getSex());
 		if (sex != null) empl.setSex(sex);
 		
@@ -658,7 +669,7 @@ public class DominoServiceBean implements DominoService {
 	 * @return запись сущности Подразделения
 	 */
 	private OrgUnit getOrgUnitbyNotesUNID (String docUNID) {
-		Optional<OrgUnit> orgUnitOptional = dataManager.load(OrgUnit.class).
+		Optional<OrgUnit> orgUnitOptional = txDataManager.load(OrgUnit.class).
 				query(orgUnitbyUNIDSearchQuery).
 				parameter("extid", docUNID).
 				optional();
@@ -686,4 +697,516 @@ public class DominoServiceBean implements DominoService {
 	    return branch;
 	}
 	
+	@Override
+	public void processEmployees() {
+		try {
+			logger.info("Start process Employees");
+			String authToken = this.getAuthToken();
+			
+			if (authToken == null) throw new Exception ("Cannot get Autentification Token");
+			
+			logger.info("Getting OkHttpClient");
+			OkHttpClient httpClient = this.getHttpClient();
+			
+			logger.info("Getting Gson");
+			Gson gson = this.getGson();
+			
+			logger.info("Getting Retrofit");
+			Retrofit retrofit = this.getRetrofit(httpClient, gson);
+			
+			logger.info("Calling Service");
+			DominoIntegration service = retrofit.create(DominoIntegration.class);
+			Call<List<Employee>> employees = service.createEmployees(authToken);
+			
+			Response<List<Employee>> listResponse = employees.execute();
+			
+			if (! listResponse.isSuccessful()) throw new Exception ("Service Returned Error: \"+" +
+					listResponse.errorBody().string());
+			
+			logger.info("Process Service Response Results");
+			
+			List<Employee> emplResponseList = listResponse.body();
+		    for (Employee employee: emplResponseList) {
+		    	try {
+		    		//Создание/ обновление данных по сотрудникам
+				    this.processEmployee(employee);
+			    }catch (Exception e){
+		    		logger.error("Error response process: "+ e.getLocalizedMessage())
+;			    }
+		    }
+		    
+		} catch (Exception e) {
+			logger.error(e.getLocalizedMessage());
+		}
+		
+		finally {
+			logger.info("End process Employees");
+		}
+	}
+	
+	private OkHttpClient getHttpClient () {
+		OkHttpClient okHttpClient = new OkHttpClient.Builder()
+				.connectTimeout(12000, TimeUnit.SECONDS)
+				.writeTimeout(12000, TimeUnit.SECONDS)
+				.readTimeout(13000, TimeUnit.SECONDS)
+				.build();
+		
+		return okHttpClient;
+	}
+	
+	
+	private Gson getGson() {
+		GsonBuilder gsonBuilder = new GsonBuilder().setLenient();
+		gsonBuilder.registerTypeAdapter(Date.class,
+				new DateDeserializer());
+		Gson gson = gsonBuilder.create();
+		
+		return gson;
+	}
+	
+	private Retrofit getRetrofit(OkHttpClient okHttpClient, Gson gson) {
+		Retrofit retrofit = new Retrofit.Builder()
+				.baseUrl(emplServiceURL)
+				.addConverterFactory(GsonConverterFactory.create(gson))
+				.client(okHttpClient)
+				.build();
+		return retrofit;
+	}
+	
+	
+	/**
+	 * Processing employee
+	 * @param employee Employee for processing
+	 * @throws Exception
+	 */
+	
+	private void processEmployee(Employee employee) throws Exception {
+		try {
+			logger.info("Search Empl");
+			Empl empl = emplService.getEmplbyOuterEmployee(employee);
+			
+			if (empl == null) {
+				logger.info("Create new Empl");
+				this.createNewEmpl(employee);
+			}
+		} catch (Exception e) {
+			throw new Exception ("Error processEmployee: \n"+
+					employee.getCommonDatas().getLogin()+"\n"+
+					e.getLocalizedMessage());
+		}
+	}
+	
+	
+	/**
+	 * Creating new Empl Entity record
+	 * @param employee Employee or processing
+	 * @throws Exception
+	 */
+	@Transactional
+	private Empl createNewEmpl(Employee employee) throws Exception {
+		try {
+			String emplLogin = employee.getCommonDatas().getLogin();
+			User user = this.getUserbyLogin(emplLogin);
+			if (user == null) {
+				logger.info("Creating new user");
+				user = this.createUser(employee);
+				txDataManager.save(user);
+			}
+			
+			Empl empl = txDataManager.create(Empl.class);
+			empl.setUser(user);
+			
+			logger.info("Writing common Empl datas");
+			this.writeEmplCommonDatas(employee.getCommonDatas(), empl);
+			
+			logger.info("Writing Placement Empl datas");
+			this.writeEmplPlaacementDatas(employee.getPlacement(), empl);
+			
+			logger.info("Writing Photo Empl datas");
+			this.writeEmplPhotoDatas(employee.getPhotoDatas(), empl);
+			
+			logger.info("Writing Staff Empl datas");
+			this.writeEmplStaffdatas(employee.getStaffDatas(), empl);
+			
+			txDataManager.save(empl);
+			
+			Employee chiefEmployee = employee.getStaffDatas().getChief();
+			if (chiefEmployee != null) {
+				
+				String chiefLogin = chiefEmployee.getCommonDatas().getLogin();
+				logger.info("Processing Empl Chief: "+ chiefLogin);
+				Empl chiefEmpl = emplService.getEmplbyLogin(chiefLogin);
+				
+				if (chiefEmpl == null) {
+					logger.info("Creating new chief to  Employee");
+					chiefEmpl = this.createNewEmpl(chiefEmployee);
+					txDataManager.save(chiefEmpl);
+				} else {
+					logger.info("found chief to  Employee");
+				}
+				
+				if (chiefEmpl != null) {
+					empl.setChief(chiefEmpl);
+				}
+				
+				txDataManager.save(empl);
+			}
+			
+			
+			return empl;
+		}catch (Exception e) {
+			throw new Exception ("Error createNewEmpl: \n"+
+					e.getLocalizedMessage());
+		}
+	}
+	
+	private void writeEmplCommonDatas(CommonDatas emplCommonDatas ,
+	                                  Empl empl) throws Exception {
+		try {
+			empl.setBirthdate(emplCommonDatas.getBirthDate());
+			empl.setNotesname(emplCommonDatas.getNotesName());
+			empl.setExtid(emplCommonDatas.getExtID());
+			
+			Sex sex = Sex.fromId(emplCommonDatas.getSex());
+			if (sex != null) empl.setSex(sex);
+			empl.setBirthdate(emplCommonDatas.getBirthDate());
+		
+		
+		}catch (Exception e) {
+			throw new Exception ("Error writeEmplCommonDatas: \n"+
+					e.getLocalizedMessage());
+		}
+	}
+	
+	
+	private void writeEmplPlaacementDatas(Placement emplPlacementDatas,
+	                                      Empl empl) throws Exception {
+		try {
+			String branchCode = emplPlacementDatas.getBranchCode();
+			
+			Branch emplBranch = this.getBranchByCode(branchCode);
+			if (emplBranch != null) empl.setBranch(emplBranch);
+			
+			empl.setCity(emplPlacementDatas.getCity());
+			empl.setExtphone(emplPlacementDatas.getExtPhone());
+			empl.setMobilephone(emplPlacementDatas.getMobilePhone());
+			empl.setPhone(emplPlacementDatas.getPhone());
+			empl.setOffice(emplPlacementDatas.getOffice());
+		
+		}catch (Exception e) {
+			throw new Exception("Error writeEmplPlaacementDatas: \n"+
+					e.getLocalizedMessage());
+		}
+	}
+	
+	private void writeEmplPhotoDatas(PhotoDatas emplPhotoDatas,
+	                                 Empl empl) throws Exception {
+		try {
+			FileDescriptor fileDescriptor = this.getFileDescriptorbyName(emplPhotoDatas);
+			
+			if (fileDescriptor != null) empl.setPhoto(fileDescriptor);
+			
+		} catch (Exception e) {
+			throw new Exception("Error writeEmplPhotoDatas: \n"+
+					e.getLocalizedMessage());
+		}
+		
+	}
+	
+	
+	private FileDescriptor getFileDescriptorbyName (PhotoDatas emplPhotoDatas) throws Exception {
+		FileDescriptor descriptor = null;
+		String fileName = emplPhotoDatas.getPhotofileName();
+		Optional<FileDescriptor> fileDescriptorOptional = txDataManager.load(FileDescriptor.class)
+				.query(emplFileDescriptorSearchQuery)
+				.parameter("fileName", fileName)
+				.optional();
+		
+		if (fileDescriptorOptional.isPresent()) {
+			logger.info("Found Existing PhotoFileDescriptor");
+			descriptor = fileDescriptorOptional.get();
+		} else {
+			logger.info("Creating new PhotoFileDescriptor");
+			descriptor = this.createFileDescriptor(emplPhotoDatas);
+		}
+		
+		return descriptor;
+	}
+	@Transactional
+	private FileDescriptor createFileDescriptor (PhotoDatas emplPhotoDatas) throws Exception {
+		try {
+			FileDescriptor fileDescriptor = null;
+			
+			byte[] filaData = emplPhotoDatas.getPhotoFileBytes();
+			if (filaData == null) return null;
+			
+			fileDescriptor = txDataManager.create(FileDescriptor.class);
+			fileDescriptor.setName(emplPhotoDatas.getPhotofileName());
+			fileDescriptor.setExtension(emplPhotoDatas.getPhotoFileExtension());
+			
+			fileDescriptor.setSize((long) emplPhotoDatas.getPhotoFileBytes().length);
+			fileDescriptor.setCreateDate(timeSource.currentTimestamp());
+			try {
+				fileLoader.saveStream(fileDescriptor, () -> new ByteArrayInputStream(filaData));
+			} catch (FileStorageException e) {
+				e.printStackTrace();
+			}
+			
+			txDataManager.save(fileDescriptor);
+			
+			return fileDescriptor;
+		} catch (Exception e) {
+			throw new Exception("Error createFileDescriptor: \n"+
+					e.getLocalizedMessage());
+		}
+	}
+	
+	
+	private void writeEmplStaffdatas(StaffDatas staffDatas, Empl empl) throws Exception {
+		try {
+			empl.getUser().setPosition(staffDatas.getPost());
+			empl.setTabnumber(staffDatas.getTabNumber());
+			
+			// Processing Empl OrgUnits
+			List<OrgUnit> unitList = this.getEmplOrgUnitList((ArrayList<String>)
+					staffDatas.getOrgUnitsList());
+			if (! unitList.isEmpty()) {
+				empl.setOrgunits(unitList);
+				
+				String postPath = "";
+				for (OrgUnit emplOrgUnit : unitList) {
+					if ("".equalsIgnoreCase(postPath)) {
+						postPath = emplOrgUnit.getShortname();
+						
+					} else {
+						postPath += "\\" + emplOrgUnit.getShortname();
+					}
+				}
+				
+				empl.setPostpath(postPath);
+				
+			}
+			
+		}catch (Exception e) {
+			throw new Exception("Error writeEmplStaffdatas: \n"+
+					e.getLocalizedMessage());
+		}
+	}
+	
+	
+	/**
+	 * Update Employees
+	 */
+	@Override
+	public void updateEmployees() {
+		try {
+			logger.info("Start updating Employees");
+			String authToken = this.getAuthToken();
+			
+			if (authToken == null) throw new Exception("Cannot get Autentification Token");
+			
+			logger.info("Getting OkHttpClient");
+			OkHttpClient httpClient = this.getHttpClient();
+			
+			logger.info("Getting Gson");
+			Gson gson = this.getGson();
+			
+			logger.info("Getting Retrofit");
+			Retrofit retrofit = this.getRetrofit(httpClient, gson);
+			
+			logger.info("Calling Service");
+			DominoIntegration service = retrofit.create(DominoIntegration.class);
+			Call<List<Employee>> employees = service.createEmployees(authToken);
+			
+			Response<List<Employee>> listResponse = employees.execute();
+			
+			if (!listResponse.isSuccessful()) throw new Exception("Service Returned Error: \"+" +
+					listResponse.errorBody().string());
+			
+			logger.info("Process Service Response Results");
+			
+			List<Employee> emplResponseList = listResponse.body();
+			for (Employee employee : emplResponseList) {
+				try {
+					//Обновление данных по сотрудникам
+					this.updateEmployee(employee);
+				} catch (Exception e) {
+					logger.error("Error response process: " + e.getLocalizedMessage())
+					;
+				}
+			}
+			
+		} catch (Exception e) {
+			logger.error(e.getLocalizedMessage());
+		} finally {
+			logger.info("End process updating Employees");
+		}
+	}
+	
+	/**
+	 * Updating Empl Datas
+	 * @param employee Employee object
+	 * @throws Exception
+	 */
+	@Transactional
+	private void updateEmployee(Employee employee) throws Exception {
+		try {
+			ArrayList<String> updateAttributes = new ArrayList<String>();
+			//1. Поиск записи сущности
+			Empl empl = emplService.getEmplbyOuterEmployee(employee);
+			if (empl == null) return;
+			
+			//2. Формирование массива с данными для обновления
+			CommonDatas employeeCommonDatas = employee.getCommonDatas();
+			if (employeeCommonDatas != null) {
+				ArrayList<String> commonUpdateAttributesList =
+						this.getCommonUpdateAttributesArrayList(empl , employeeCommonDatas);
+				updateAttributes.addAll(commonUpdateAttributesList);
+			}
+			
+			// кадровые атрибуты
+			StaffDatas employeeStaffDatas = employee.getStaffDatas();
+			if (employeeStaffDatas != null) {
+				ArrayList<String> staffUpdateAttributesList = this.getStaffUpdateAttributesList(empl,
+						employeeStaffDatas);
+				updateAttributes.addAll(staffUpdateAttributesList);
+				
+			}
+			
+			// атрибуты месторасположения
+			Placement emplPlacement = employee.getPlacement();
+			if (emplPlacement != null) {
+				ArrayList<String> placementUpdateAttributesList = null;
+				updateAttributes.addAll(placementUpdateAttributesList);
+			}
+			
+		}catch (Exception e) {
+			throw new Exception ("Error updateEmployee: \n"+
+					e.getLocalizedMessage());
+		}
+	}
+	
+	
+	/**
+	 * Получение массива общих изменяемых атрибутов
+	 * @param empl запись в сущности Empl
+	 * @param employeeCommonDatas - общие данные из LN по сотруднику
+	 * @return массив изменяемых атрибутов
+	 * @throws Exception
+	 */
+	private ArrayList<String> getCommonUpdateAttributesArrayList(Empl empl,
+	                                                             CommonDatas employeeCommonDatas) throws Exception {
+		try {
+			
+			ArrayList<String> attrList = new ArrayList<>();
+			User emplUser = empl.getUser();
+			String notesName = empl.getNotesname();
+			String email = emplUser.getEmail();
+			String lastName = emplUser.getLastName();
+			String firstName = emplUser.getFirstName();
+			String middleName = emplUser.getMiddleName();
+			
+			if (!notesName.equalsIgnoreCase(employeeCommonDatas.getNotesName())) {
+				attrList.add("NOTESNAME");
+			}
+			
+			if (!email.equalsIgnoreCase(employeeCommonDatas.getEmail())) {
+				attrList.add("EMAIL");
+			}
+			
+			if (!lastName.equalsIgnoreCase(employeeCommonDatas.getLastName())) {
+				attrList.add("LASTNAME");
+			}
+			
+			
+			if (!firstName.equalsIgnoreCase(employeeCommonDatas.getFirstName())) {
+				attrList.add("FIRSTNAME");
+			}
+			
+			if (!middleName.equalsIgnoreCase(employeeCommonDatas.getMiddleName())) {
+				attrList.add("MIDDLENAME");
+			}
+			
+			return attrList;
+		} catch (Exception e) {
+			throw new Exception("Error getCommonUpdateAttributesArrayList: \n" +
+					e.getLocalizedMessage());
+		}
+	}
+	
+	/**
+	 * Получение кадровых атрибутов для изменения
+	 * @param empl запись в сущности Empl
+	 * @param employeeStaffDatas кадровые данные по сотруднику из LN
+	 * @return массив кадровых  атрибутов для изменения
+	 * @throws Exception
+	 */
+	private ArrayList<String> getStaffUpdateAttributesList(Empl empl,
+	                                                       StaffDatas employeeStaffDatas) throws Exception {
+		try {
+			ArrayList<String> resultList = new ArrayList<String>();
+			User emplUser = empl.getUser();
+			
+			String position = employeeStaffDatas.getPost();
+			ArrayList<String> orgUnitesArrayList = (ArrayList<String>) employeeStaffDatas.getOrgUnitsList();
+			Employee emplChief = employeeStaffDatas.getChief();
+			
+			if (emplChief != null) {
+				String chiefName = emplChief.getCommonDatas().getNotesName();
+				
+				Empl chief  = empl.getChief();
+				if (chief != null) {
+					if (! chiefName.equalsIgnoreCase(chief.getNotesname())) {
+						resultList.add("CHIEF");
+					}
+				}
+			}
+			
+			if (! position.equalsIgnoreCase(emplUser.getPosition())) {
+				resultList.add("POSITION");
+			}
+			
+			
+			List<OrgUnit> orgunits = empl.getOrgunits();
+			
+			for (OrgUnit orgUnit : orgunits) {
+				String orgUnitExtId = orgUnit.getExtid();
+				if (! orgUnitesArrayList.contains(orgUnitExtId)) {
+					resultList.add("ORGUNIT");
+				}
+			}
+			
+			return resultList;
+		} catch (Exception e ) {
+			throw new Exception("Error getStaffUpdateAttributesList: \n" +
+					e.getLocalizedMessage());
+		}
+		
+	}
+	
+	
+	private ArrayList<String> getPlacementUpdateAttributesList (Empl empl ,
+	                                                            Placement emplPlacement) throws Exception {
+		try {
+			ArrayList<String> resulList = new ArrayList<>();
+			
+			Branch emplBranch = empl.getBranch();
+			if (emplBranch != null) {
+				String emplBranchCode = emplBranch.getCode();
+				if (! emplBranchCode.equalsIgnoreCase(emplPlacement.getBranchCode())) {
+					resulList.add("BRANCH");
+				}
+			}
+			
+			String city = empl.getCity();
+			
+			
+			return resulList;
+		}catch (Exception e){
+			throw new Exception("Error getStaffUpdateAttributesList: \n" +
+					e.getLocalizedMessage());
+		}
+		
+		
+	}
 }

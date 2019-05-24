@@ -2,7 +2,7 @@
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd" caption="msg://browseCaption"
         focusComponent="emplsTable" messagesPack="com.svb.empl.web.empl">
     <data readOnly="true">
-        <collection id="emplsDc" class="com.svb.empl.entity.Empl" view="empl-view">
+        <collection id="emplsDc" class="com.svb.empl.entity.Empl" view="empl-view_1">
             <loader id="emplsDl">
                 <query><![CDATA[select e from empl_Empl e]]></query>
             </loader>

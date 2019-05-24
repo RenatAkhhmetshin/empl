@@ -19,11 +19,17 @@ public interface DominoService {
 	String emplSearchLoginQuery = "select e from empl_Empl e where e.user.login =:userlogin";
 	
 	String emplBranchSearchQuery = "select e from empl_Branch e where e.code =:branchcode";
+	
+	String emplFileDescriptorSearchQuery = "select e from sys$FileDescriptor e where e.name = :fileName";
 	void getDominoEmployees ();
 	
-	Employee getDominoEmployeebyTabNumber (String personTab);
+	Employee getDominoEmployeebyTabNumber(String personTab);
 	
 	void createEmployees();
 	
 	void createOrgUnits();
+	
+	void processEmployees();
+	
+	void updateEmployees();
 }

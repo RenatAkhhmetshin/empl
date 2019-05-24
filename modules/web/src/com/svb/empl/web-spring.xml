@@ -11,7 +11,7 @@
         <property name="remoteServices">
             <map>
                 <entry key="empl_DominoService" value="com.svb.empl.service.DominoService"/>
-                <entry key="empl_UserService" value="com.svb.empl.service.UserService"/>
+                <entry key="empl_EmplService" value="com.svb.empl.service.EmplService"/>
             </map>
         </property>
     </bean>

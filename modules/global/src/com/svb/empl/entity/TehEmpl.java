@@ -9,8 +9,6 @@ import java.util.List;
 @Table(name = "EMPL_TEH_EMPL")
 @Entity(name = "empl_TehEmpl")
 public class TehEmpl extends StandardEntity {
-	@OneToOne(fetch = FetchType.LAZY, mappedBy = "tech")
-	protected Empl empl;
 	
 	@Column(name = "EXTID", length = 100)
 	protected String extid;
@@ -118,11 +116,4 @@ public class TehEmpl extends StandardEntity {
 		this.extid = extid;
 	}
 	
-	public Empl getEmpl() {
-		return empl;
-	}
-	
-	public void setEmpl(Empl empl) {
-		this.empl = empl;
-	}
 }

@@ -56,10 +56,6 @@ public class Empl extends StandardEntity {
 	@ManyToMany(mappedBy = "")
 	protected List<OrgUnit> orgunits;
 	
-	@OneToOne(fetch = FetchType.LAZY, mappedBy = "")
-	@JoinColumn(name = "TECH_ID")
-	protected TehEmpl tech;
-	
 	@Column(name = "SEX")
 	protected String sex;
 	
@@ -69,6 +65,28 @@ public class Empl extends StandardEntity {
 	
 	@Column(name = "POSTPATH")
 	protected String postpath;
+	
+	@Column(name = "TABNUMBER", length = 40)
+	protected String tabnumber;
+	
+	@Column(name = "EXTID", length = 50)
+	protected String extid;
+	
+	public String getExtid() {
+		return extid;
+	}
+	
+	public void setExtid(String extid) {
+		this.extid = extid;
+	}
+	
+	public String getTabnumber() {
+		return tabnumber;
+	}
+	
+	public void setTabnumber(String tabnumber) {
+		this.tabnumber = tabnumber;
+	}
 	
 	public String getPostpath() {
 		return postpath;
@@ -84,14 +102,6 @@ public class Empl extends StandardEntity {
 	
 	public void setSex(Sex sex) {
 		this.sex = sex == null ? null : sex.getId();
-	}
-	
-	public TehEmpl getTech() {
-		return tech;
-	}
-	
-	public void setTech(TehEmpl tech) {
-		this.tech = tech;
 	}
 	
 	public List<OrgUnit> getOrgunits() {
@@ -205,7 +215,7 @@ public class Empl extends StandardEntity {
 	
 	public String getCaption () {
 		String caption = user.getFirstName()+" "+
-				user.getMiddleName()+" "+ user.getLastName() + "("+postpath+"\\"+user.getPosition()+")";
+				user.getMiddleName()+" "+ user.getLastName() + " "+"("+postpath+"\\"+user.getPosition()+")";
 		
 		return  caption;
 	}
