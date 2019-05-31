@@ -34,6 +34,8 @@
                                        property="phone" width="100%"/>
                             <textField id="extphone" caption="msg://extphone" dataContainer="emplDc" editable="false"
                                        property="extphone" width="100%"/>
+                            <textField id="mobilePhone" caption="msg://mobilePhone" dataContainer="emplDc" editable="false"
+                                       property="mobilephone" width="100%"/>
                             <textField id="email" caption="msg://email" dataContainer="emplDc" property="user.email"
                                        width="100%"/>
 
@@ -44,8 +46,11 @@
                                        property="city" width="100%"/>
                             <textField id="office" caption="msg://office" dataContainer="emplDc" editable="false"
                                        property="office" width="100%"/>
+                            <textField id="room" caption="msg://room" dataContainer="emplDc"
+                                       property="room" editable="false" width="100%"/>
                             <textField id="branchname" caption="msg://branchname" dataContainer="emplDc"
                                        property="branch.name" editable="false" width="100%"/>
+
                         </vbox>
                     </split>
                 </vbox>

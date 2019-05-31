@@ -5,7 +5,6 @@ import com.haulmont.cuba.security.entity.User;
 import com.svb.empl.entity.Empl;
 import org.springframework.stereotype.Service;
 import retrofit.Employee;
-import sun.awt.SunToolkit;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -22,6 +21,7 @@ public class EmplServiceBean implements EmplService {
 		Optional<Empl> optionalEmpl = transDataManager.load(Empl.class)
 				.query(emplSearchbyLoginQuery)
 				.parameter("userLogin" , userLogin)
+				.view("empl-view_1")
 				.optional();
 		
 		if (optionalEmpl.isPresent()) empl = optionalEmpl.get();
@@ -36,6 +36,7 @@ public class EmplServiceBean implements EmplService {
 		Optional<Empl> optionalEmpl = transDataManager.load(Empl.class)
 				.query(emplSearchbyEmailQuery)
 				.parameter("useremail" , userEmail)
+				.view("empl-view_1")
 				.optional();
 		
 		if (optionalEmpl.isPresent()) empl = optionalEmpl.get();
@@ -50,6 +51,7 @@ public class EmplServiceBean implements EmplService {
 		Optional<Empl> optionalEmpl = transDataManager.load(Empl.class)
 				.query(emplSearchbyTabNumberQuery)
 				.parameter("usertabnumber" , userTabNumber)
+				.view("empl-view_1")
 				.optional();
 		
 		if (optionalEmpl.isPresent()) empl = optionalEmpl.get();
@@ -70,6 +72,7 @@ public class EmplServiceBean implements EmplService {
 		Optional<Empl> optionalEmpl = transDataManager.load(Empl.class)
 				.query(emplSearchbyExtIDQuery)
 				.parameter("userextid" , userExtID)
+		        .view("empl-view_1")
 				.optional();
 		
 		if (optionalEmpl.isPresent()) empl = optionalEmpl.get();
@@ -85,6 +88,7 @@ public class EmplServiceBean implements EmplService {
 		Optional<Empl> optionalEmpl = transDataManager.load(Empl.class)
 				.query(emplSearchbyUserQuesry)
 				.parameter("user" , user)
+				.view("empl-view_1")
 				.optional();
 		
 		if (optionalEmpl.isPresent()) empl = optionalEmpl.get();

@@ -14,6 +14,7 @@ public class Placement implements Serializable {
 	private String phone;
 	private String extPhone;
 	private String mobilePhone;
+	private String room;
 	
 	public Placement() {
 	
@@ -65,5 +66,13 @@ public class Placement implements Serializable {
 	
 	public void setMobilePhone(String mobilePhone) {
 		this.mobilePhone = mobilePhone;
+	}
+	
+	public String getRoom() {
+		return room;
+	}
+	
+	public void setRoom(String room) {
+		this.room = room;
 	}
 }

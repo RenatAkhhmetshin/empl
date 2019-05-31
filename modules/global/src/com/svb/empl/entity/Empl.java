@@ -15,63 +15,63 @@ import java.util.List;
 public class Empl extends StandardEntity {
 	@Column(name = "NOTESNAME")
 	protected String notesname;
-	
-	@OneToOne(fetch = FetchType.LAZY, mappedBy = "")
+
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "USER_ID")
 	protected User user;
-	
+
 	@Column(name = "CITY", length = 100)
 	protected String city;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "BRANCH_ID")
 	protected Branch branch;
-	
+
 	@Column(name = "OFFICE", length = 150)
 	protected String office;
-	
+
 	@Column(name = "PHONE", length = 100)
 	protected String phone;
-	
+
 	@Column(name = "EXTPHONE", length = 100)
 	protected String extphone;
-	
+
 	@Column(name = "MOBILEPHONE")
 	protected String mobilephone;
-	
+
 	@Column(name = "ROOM")
 	protected String room;
-	
+
 	@Temporal(TemporalType.DATE)
 	@Column(name = "BIRTHDATE")
 	protected Date birthdate;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CHIEF_ID")
 	protected Empl chief;
-	
+
 	@JoinTable(name = "EMPL_EMPL_ORG_UNIT_LINK",
 			joinColumns = @JoinColumn(name = "EMPL_ID"),
 			inverseJoinColumns = @JoinColumn(name = "ORG_UNIT_ID"))
-	@ManyToMany(mappedBy = "")
+	@ManyToMany
 	protected List<OrgUnit> orgunits;
-	
+
 	@Column(name = "SEX")
 	protected String sex;
-	
+
 	@OneToOne(fetch = FetchType.LAZY, mappedBy = "")
 	@JoinColumn(name = "PHOTO_ID")
 	protected FileDescriptor photo;
-	
+
 	@Column(name = "POSTPATH")
 	protected String postpath;
-	
+
 	@Column(name = "TABNUMBER", length = 40)
 	protected String tabnumber;
-	
+
 	@Column(name = "EXTID", length = 50)
 	protected String extid;
-	
+
 	public String getExtid() {
 		return extid;
 	}

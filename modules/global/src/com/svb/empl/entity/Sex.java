@@ -23,7 +23,7 @@ public enum Sex implements EnumClass<String> {
 	@Nullable
 	public static Sex fromId(String id) {
 		for (Sex at : Sex.values()) {
-			if (at.getId().equals(id)) {
+			if (at.getId().equalsIgnoreCase(id)) {
 				return at;
 			}
 		}

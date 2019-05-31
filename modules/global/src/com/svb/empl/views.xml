@@ -10,7 +10,7 @@
     </view>
     <view entity="empl_Empl" name="empl-view_1" extends="_local">
         <property name="user" view="_local"/>
-        <property name="branch" view="_minimal"/>
+        <property name="branch" view="_local"/>
         <property name="chief" view="_local">
             <property name="user" view="_local"/>
             <property name="branch" view="_minimal"/>
@@ -26,6 +26,8 @@
         <property name="orgunits" view="_local">
             <property name="parent" view="_local"/>
         </property>
-        <property name="photo" view="_minimal"/>
+        <property name="photo" view="_minimal">
+            <property name="size"/>
+        </property>
     </view>
 </views>

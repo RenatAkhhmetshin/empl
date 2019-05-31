@@ -1,7 +1,6 @@
 package com.svb.empl.service;
 
 
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.haulmont.cuba.core.Persistence;
@@ -13,6 +12,7 @@ import com.haulmont.cuba.security.entity.User;
 import com.svb.empl.core.EmployeeCreator;
 import com.svb.empl.entity.*;
 import okhttp3.OkHttpClient;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class DominoServiceBean implements DominoService {
 	private DataManager dataManager;
 	private String userSearchbyLoginQuery = "select e from sec$User e where e.login = :userlogin";
 	
-	private  String defaultGroupID = "0fa2b1a5-1d68-4d69-9fbd-dff348347f93";
+	private String defaultGroupID = "0fa2b1a5-1d68-4d69-9fbd-dff348347f93";
 	
 	@Inject
 	private EmployeeCreator employeeCreator;
@@ -189,7 +189,7 @@ public class DominoServiceBean implements DominoService {
 				
 			});*/
 			
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error(e.getLocalizedMessage());
 		}
@@ -240,9 +240,8 @@ public class DominoServiceBean implements DominoService {
 				employee = execute.body();
 				
 				
-				
 			}
-
+			
 			return employee;
 		} catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
@@ -270,6 +269,7 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Создание сотрудников
+	 *
 	 * @author adms-Ahmetshin-RM
 	 */
 	@Override
@@ -317,10 +317,10 @@ public class DominoServiceBean implements DominoService {
 				
 				for (Employee employee : employeeList) {
 					String userLogin = employee.getCommonDatas().getLogin();
-				
+					
 					Empl empl = this.getEmplbyLogin(userLogin);
 					if (empl == null) {
-						logger.info("Need create new employee: "+ userLogin);
+						logger.info("Need create new employee: " + userLogin);
 						empl = this.createEmpl(employee);
 						dataManager.commit(empl);
 						
@@ -333,7 +333,7 @@ public class DominoServiceBean implements DominoService {
 				
 			} else {
 				logger.info("Retrofit обработал с ошибкой");
-				logger.error("Retrofit error body:"+
+				logger.error("Retrofit error body:" +
 						listResponse.errorBody().string());
 			}
 			
@@ -391,16 +391,16 @@ public class DominoServiceBean implements DominoService {
 				
 				//dataManager.commit(this.commitContext);
 			} else {
-				logger.error("listResponse error:"+
+				logger.error("listResponse error:" +
 						listResponse.errorBody().string());
 			}
 			
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
 	}
 	
-	private User getUserbyLogin (String userLogin) {
+	private User getUserbyLogin(String userLogin) {
 		
 		User user = null;
 		Optional<User> optionalUser = dataManager.load(User.class).
@@ -416,7 +416,7 @@ public class DominoServiceBean implements DominoService {
 		return user;
 	}
 	
-	private Empl getEmplbyLogin (String userLogin) {
+	private Empl getEmplbyLogin(String userLogin) {
 		Empl empl = null;
 		
 		Optional<Empl> optionalEmpl = dataManager.load(Empl.class).
@@ -432,8 +432,8 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Создание нового сотрудника
-	 * @param employee объект с данными по сотруднику
 	 *
+	 * @param employee объект с данными по сотруднику
 	 */
 	private Empl createEmpl(Employee employee) {
 		Empl empl = metadata.create(Empl.class);
@@ -501,7 +501,6 @@ public class DominoServiceBean implements DominoService {
 		}
 		
 		
-		
 		// получение данных по руководителю
 		Employee chiefEmployee = employee.getStaffDatas().getChief();
 		Empl chiefEmpl = null;
@@ -513,7 +512,7 @@ public class DominoServiceBean implements DominoService {
 			if (chiefEmpl == null) {
 				chiefEmpl = this.createEmpl(chiefEmployee);
 				dataManager.commit(chiefEmpl);
-			
+				
 			}
 			
 			if (chiefEmpl != null) {
@@ -522,11 +521,11 @@ public class DominoServiceBean implements DominoService {
 			}
 		}
 		
-		return  empl;
+		return empl;
 	}
 	
 	
-	private List<Post> getEmplPostList (ArrayList<String> employeePostArrayList ) {
+	private List<Post> getEmplPostList(ArrayList<String> employeePostArrayList) {
 		ArrayList<Post> postArrayList = new ArrayList<Post>();
 		
 		for (String postUnid : employeePostArrayList) {
@@ -542,32 +541,34 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Получение массива подразделений по сотруднику
+	 *
 	 * @param employeeOrgUnitsList
 	 * @return
 	 */
-	private List<OrgUnit> getEmplOrgUnitList (ArrayList<String> employeeOrgUnitsList) {
+	private List<OrgUnit> getEmplOrgUnitList(ArrayList<String> employeeOrgUnitsList) {
 		ArrayList<OrgUnit> units = new ArrayList<OrgUnit>();
 		
 		for (String employeeOrgUnitUnid : employeeOrgUnitsList) {
 			OrgUnit orgUnit = this.getOrgUnitbyNotesUNID(employeeOrgUnitUnid);
 			if (orgUnit != null) {
-				if (! units.contains(orgUnit)) units.add(orgUnit);
+				if (!units.contains(orgUnit)) units.add(orgUnit);
 			}
 		}
 		
-		return  units;
+		return units;
 	}
 	
 	/**
 	 * Создание нового пользователя
+	 *
 	 * @param employee данные по сотруднику
 	 * @return объект класса User
 	 */
-	private User createUser (Employee employee) {
+	private User createUser(Employee employee) {
 		User user = metadata.create(User.class);
 		user.setActive(Boolean.TRUE);
-		String fullName = employee.getCommonDatas().getLastName()+" "+
-				employee.getCommonDatas().getFirstName()+" "+
+		String fullName = employee.getCommonDatas().getLastName() + " " +
+				employee.getCommonDatas().getFirstName() + " " +
 				employee.getCommonDatas().getMiddleName();
 		
 		user.setName(fullName);
@@ -601,10 +602,11 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Создаг
+	 *
 	 * @param photoDatas данные фото сотрудника
 	 * @return Объект FileDescriptor
 	 */
-	private FileDescriptor getPhotoDescriptor (PhotoDatas photoDatas) {
+	private FileDescriptor getPhotoDescriptor(PhotoDatas photoDatas) {
 		byte[] filaData = photoDatas.getPhotoFileBytes();
 		if (filaData == null) return null;
 		
@@ -614,6 +616,7 @@ public class DominoServiceBean implements DominoService {
 		
 		fileDescriptor.setSize((long) photoDatas.getPhotoFileBytes().length);
 		fileDescriptor.setCreateDate(timeSource.currentTimestamp());
+		
 		try {
 			fileLoader.saveStream(fileDescriptor, () -> new ByteArrayInputStream(filaData));
 		} catch (FileStorageException e) {
@@ -621,20 +624,20 @@ public class DominoServiceBean implements DominoService {
 		}
 		
 		
-		
 		return fileDescriptor;
 	}
 	
 	/**
 	 * Создание новой записи подразделения
+	 *
 	 * @param emplOrgUnit данные по  подразделению
 	 */
-	private OrgUnit createOrgUnit (EmplOrgUnit emplOrgUnit) {
+	private OrgUnit createOrgUnit(EmplOrgUnit emplOrgUnit) {
 		String orgUnitUnid = emplOrgUnit.getOrgUnitUnid();
 		OrgUnit orgUnit = null;
 		if ((!orgUnitUnid.isEmpty()) && (orgUnitUnid != null)) {
 			orgUnit = this.getOrgUnitbyNotesUNID(orgUnitUnid);
-		
+			
 			if (orgUnit == null) {
 				orgUnit = metadata.create(OrgUnit.class);
 				
@@ -665,10 +668,11 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Получение данных по подразделению по UNID
+	 *
 	 * @param docUNID UNID карточки подразделения
 	 * @return запись сущности Подразделения
 	 */
-	private OrgUnit getOrgUnitbyNotesUNID (String docUNID) {
+	private OrgUnit getOrgUnitbyNotesUNID(String docUNID) {
 		Optional<OrgUnit> orgUnitOptional = txDataManager.load(OrgUnit.class).
 				query(orgUnitbyUNIDSearchQuery).
 				parameter("extid", docUNID).
@@ -680,21 +684,22 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Получение данных по филиалу сотрудника
+	 *
 	 * @param branchCode код филиала
 	 * @return объект Branch
 	 */
-	private Branch getBranchByCode (String branchCode) {
-	    Branch branch = null;
-	    Optional<Branch> optionalBranch = dataManager.load(Branch.class).
-			    query(emplBranchSearchQuery).
-			    parameter("branchcode" , branchCode).
-			    optional();
-	    
-	    if (optionalBranch.isPresent()) {
-	    	branch = optionalBranch.get();
-	    }
-	    
-	    return branch;
+	private Branch getBranchByCode(String branchCode) {
+		Branch branch = null;
+		Optional<Branch> optionalBranch = dataManager.load(Branch.class).
+				query(emplBranchSearchQuery).
+				parameter("branchcode", branchCode).
+				optional();
+		
+		if (optionalBranch.isPresent()) {
+			branch = optionalBranch.get();
+		}
+		
+		return branch;
 	}
 	
 	@Override
@@ -703,7 +708,7 @@ public class DominoServiceBean implements DominoService {
 			logger.info("Start process Employees");
 			String authToken = this.getAuthToken();
 			
-			if (authToken == null) throw new Exception ("Cannot get Autentification Token");
+			if (authToken == null) throw new Exception("Cannot get Autentification Token");
 			
 			logger.info("Getting OkHttpClient");
 			OkHttpClient httpClient = this.getHttpClient();
@@ -720,31 +725,30 @@ public class DominoServiceBean implements DominoService {
 			
 			Response<List<Employee>> listResponse = employees.execute();
 			
-			if (! listResponse.isSuccessful()) throw new Exception ("Service Returned Error: \"+" +
+			if (!listResponse.isSuccessful()) throw new Exception("Service Returned Error: \"+" +
 					listResponse.errorBody().string());
 			
 			logger.info("Process Service Response Results");
 			
 			List<Employee> emplResponseList = listResponse.body();
-		    for (Employee employee: emplResponseList) {
-		    	try {
-		    		//Создание/ обновление данных по сотрудникам
-				    this.processEmployee(employee);
-			    }catch (Exception e){
-		    		logger.error("Error response process: "+ e.getLocalizedMessage())
-;			    }
-		    }
-		    
+			for (Employee employee : emplResponseList) {
+				try {
+					//Создание/ обновление данных по сотрудникам
+					this.processEmployee(employee);
+				} catch (Exception e) {
+					logger.error("Error response process: " + e.getLocalizedMessage())
+					;
+				}
+			}
+			
 		} catch (Exception e) {
 			logger.error(e.getLocalizedMessage());
-		}
-		
-		finally {
+		} finally {
 			logger.info("End process Employees");
 		}
 	}
 	
-	private OkHttpClient getHttpClient () {
+	private OkHttpClient getHttpClient() {
 		OkHttpClient okHttpClient = new OkHttpClient.Builder()
 				.connectTimeout(12000, TimeUnit.SECONDS)
 				.writeTimeout(12000, TimeUnit.SECONDS)
@@ -776,6 +780,7 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Processing employee
+	 *
 	 * @param employee Employee for processing
 	 * @throws Exception
 	 */
@@ -790,8 +795,8 @@ public class DominoServiceBean implements DominoService {
 				this.createNewEmpl(employee);
 			}
 		} catch (Exception e) {
-			throw new Exception ("Error processEmployee: \n"+
-					employee.getCommonDatas().getLogin()+"\n"+
+			throw new Exception("Error processEmployee: \n" +
+					employee.getCommonDatas().getLogin() + "\n" +
 					e.getLocalizedMessage());
 		}
 	}
@@ -799,6 +804,7 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Creating new Empl Entity record
+	 *
 	 * @param employee Employee or processing
 	 * @throws Exception
 	 */
@@ -832,9 +838,8 @@ public class DominoServiceBean implements DominoService {
 			
 			Employee chiefEmployee = employee.getStaffDatas().getChief();
 			if (chiefEmployee != null) {
-				
 				String chiefLogin = chiefEmployee.getCommonDatas().getLogin();
-				logger.info("Processing Empl Chief: "+ chiefLogin);
+				logger.info("Processing Empl Chief: " + chiefLogin);
 				Empl chiefEmpl = emplService.getEmplbyLogin(chiefLogin);
 				
 				if (chiefEmpl == null) {
@@ -854,26 +859,27 @@ public class DominoServiceBean implements DominoService {
 			
 			
 			return empl;
-		}catch (Exception e) {
-			throw new Exception ("Error createNewEmpl: \n"+
+		} catch (Exception e) {
+			throw new Exception("Error createNewEmpl: \n" +
 					e.getLocalizedMessage());
 		}
 	}
 	
-	private void writeEmplCommonDatas(CommonDatas emplCommonDatas ,
+	private void writeEmplCommonDatas(CommonDatas emplCommonDatas,
 	                                  Empl empl) throws Exception {
 		try {
 			empl.setBirthdate(emplCommonDatas.getBirthDate());
 			empl.setNotesname(emplCommonDatas.getNotesName());
 			empl.setExtid(emplCommonDatas.getExtID());
 			
+			logger.info("Employee Sex: " + emplCommonDatas.getSex());
 			Sex sex = Sex.fromId(emplCommonDatas.getSex());
 			if (sex != null) empl.setSex(sex);
 			empl.setBirthdate(emplCommonDatas.getBirthDate());
-		
-		
-		}catch (Exception e) {
-			throw new Exception ("Error writeEmplCommonDatas: \n"+
+			
+			
+		} catch (Exception e) {
+			throw new Exception("Error writeEmplCommonDatas: \n" +
 					e.getLocalizedMessage());
 		}
 	}
@@ -892,9 +898,9 @@ public class DominoServiceBean implements DominoService {
 			empl.setMobilephone(emplPlacementDatas.getMobilePhone());
 			empl.setPhone(emplPlacementDatas.getPhone());
 			empl.setOffice(emplPlacementDatas.getOffice());
-		
-		}catch (Exception e) {
-			throw new Exception("Error writeEmplPlaacementDatas: \n"+
+			empl.setRoom(emplPlacementDatas.getRoom());
+		} catch (Exception e) {
+			throw new Exception("Error writeEmplPlaacementDatas: \n" +
 					e.getLocalizedMessage());
 		}
 	}
@@ -907,14 +913,14 @@ public class DominoServiceBean implements DominoService {
 			if (fileDescriptor != null) empl.setPhoto(fileDescriptor);
 			
 		} catch (Exception e) {
-			throw new Exception("Error writeEmplPhotoDatas: \n"+
+			throw new Exception("Error writeEmplPhotoDatas: \n" +
 					e.getLocalizedMessage());
 		}
 		
 	}
 	
 	
-	private FileDescriptor getFileDescriptorbyName (PhotoDatas emplPhotoDatas) throws Exception {
+	private FileDescriptor getFileDescriptorbyName(PhotoDatas emplPhotoDatas) throws Exception {
 		FileDescriptor descriptor = null;
 		String fileName = emplPhotoDatas.getPhotofileName();
 		Optional<FileDescriptor> fileDescriptorOptional = txDataManager.load(FileDescriptor.class)
@@ -932,8 +938,9 @@ public class DominoServiceBean implements DominoService {
 		
 		return descriptor;
 	}
+	
 	@Transactional
-	private FileDescriptor createFileDescriptor (PhotoDatas emplPhotoDatas) throws Exception {
+	private FileDescriptor createFileDescriptor(PhotoDatas emplPhotoDatas) throws Exception {
 		try {
 			FileDescriptor fileDescriptor = null;
 			
@@ -956,7 +963,7 @@ public class DominoServiceBean implements DominoService {
 			
 			return fileDescriptor;
 		} catch (Exception e) {
-			throw new Exception("Error createFileDescriptor: \n"+
+			throw new Exception("Error createFileDescriptor: \n" +
 					e.getLocalizedMessage());
 		}
 	}
@@ -970,7 +977,7 @@ public class DominoServiceBean implements DominoService {
 			// Processing Empl OrgUnits
 			List<OrgUnit> unitList = this.getEmplOrgUnitList((ArrayList<String>)
 					staffDatas.getOrgUnitsList());
-			if (! unitList.isEmpty()) {
+			if (!unitList.isEmpty()) {
 				empl.setOrgunits(unitList);
 				
 				String postPath = "";
@@ -987,8 +994,8 @@ public class DominoServiceBean implements DominoService {
 				
 			}
 			
-		}catch (Exception e) {
-			throw new Exception("Error writeEmplStaffdatas: \n"+
+		} catch (Exception e) {
+			throw new Exception("Error writeEmplStaffdatas: \n" +
 					e.getLocalizedMessage());
 		}
 	}
@@ -1037,6 +1044,7 @@ public class DominoServiceBean implements DominoService {
 			}
 			
 		} catch (Exception e) {
+			e.printStackTrace();
 			logger.error(e.getLocalizedMessage());
 		} finally {
 			logger.info("End process updating Employees");
@@ -1045,10 +1053,10 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Updating Empl Datas
+	 *
 	 * @param employee Employee object
 	 * @throws Exception
 	 */
-	@Transactional
 	private void updateEmployee(Employee employee) throws Exception {
 		try {
 			ArrayList<String> updateAttributes = new ArrayList<String>();
@@ -1060,7 +1068,7 @@ public class DominoServiceBean implements DominoService {
 			CommonDatas employeeCommonDatas = employee.getCommonDatas();
 			if (employeeCommonDatas != null) {
 				ArrayList<String> commonUpdateAttributesList =
-						this.getCommonUpdateAttributesArrayList(empl , employeeCommonDatas);
+						this.getCommonUpdateAttributesArrayList(empl, employeeCommonDatas);
 				updateAttributes.addAll(commonUpdateAttributesList);
 			}
 			
@@ -1076,12 +1084,28 @@ public class DominoServiceBean implements DominoService {
 			// атрибуты месторасположения
 			Placement emplPlacement = employee.getPlacement();
 			if (emplPlacement != null) {
-				ArrayList<String> placementUpdateAttributesList = null;
+				ArrayList<String> placementUpdateAttributesList = this.getPlacementUpdateAttributesList(empl,
+						emplPlacement);
 				updateAttributes.addAll(placementUpdateAttributesList);
 			}
 			
-		}catch (Exception e) {
-			throw new Exception ("Error updateEmployee: \n"+
+			// фото сотрудника
+			FileDescriptor emplPhotoFileDescriptor = empl.getPhoto();
+			long photoFileSize = employee.getPhotoDatas().getPhotoFileBytes().length;
+			if (!emplPhotoFileDescriptor.getSize().equals(photoFileSize)) {
+				updateAttributes.add("PHOTO");
+			}
+			
+			
+			// проходимся по полученному массиву и изменяем указанные атрибуты
+			if (!updateAttributes.isEmpty()) {
+				logger.info("Updating Empl: " + employee.getCommonDatas().getLogin());
+				this.updateEmplAttributes(empl, employee, updateAttributes);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Error updateEmployee: \n" +
 					e.getLocalizedMessage());
 		}
 	}
@@ -1089,7 +1113,8 @@ public class DominoServiceBean implements DominoService {
 	
 	/**
 	 * Получение массива общих изменяемых атрибутов
-	 * @param empl запись в сущности Empl
+	 *
+	 * @param empl                запись в сущности Empl
 	 * @param employeeCommonDatas - общие данные из LN по сотруднику
 	 * @return массив изменяемых атрибутов
 	 * @throws Exception
@@ -1105,38 +1130,50 @@ public class DominoServiceBean implements DominoService {
 			String lastName = emplUser.getLastName();
 			String firstName = emplUser.getFirstName();
 			String middleName = emplUser.getMiddleName();
+			String sex = null;
+			if (empl.getSex() != null) {
+				sex = empl.getSex().getId();
+			}
 			
-			if (!notesName.equalsIgnoreCase(employeeCommonDatas.getNotesName())) {
+			if (!StringUtils.equalsIgnoreCase(sex, employeeCommonDatas.getSex())) {
+				logger.info("StringUtils not equals");
+				attrList.add("SEX");
+			}
+			
+			
+			if (!StringUtils.equalsIgnoreCase(notesName, employeeCommonDatas.getNotesName())) {
 				attrList.add("NOTESNAME");
 			}
 			
-			if (!email.equalsIgnoreCase(employeeCommonDatas.getEmail())) {
+			if (!StringUtils.equalsIgnoreCase(email, employeeCommonDatas.getEmail())) {
 				attrList.add("EMAIL");
 			}
 			
-			if (!lastName.equalsIgnoreCase(employeeCommonDatas.getLastName())) {
+			if (!StringUtils.equalsIgnoreCase(lastName, employeeCommonDatas.getLastName())) {
 				attrList.add("LASTNAME");
 			}
 			
 			
-			if (!firstName.equalsIgnoreCase(employeeCommonDatas.getFirstName())) {
+			if (!StringUtils.equalsIgnoreCase(firstName, employeeCommonDatas.getFirstName())) {
 				attrList.add("FIRSTNAME");
 			}
 			
-			if (!middleName.equalsIgnoreCase(employeeCommonDatas.getMiddleName())) {
+			if (!StringUtils.equalsIgnoreCase(middleName, employeeCommonDatas.getMiddleName())) {
 				attrList.add("MIDDLENAME");
 			}
 			
 			return attrList;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new Exception("Error getCommonUpdateAttributesArrayList: \n" +
-					e.getLocalizedMessage());
+					e.getMessage());
 		}
 	}
 	
 	/**
 	 * Получение кадровых атрибутов для изменения
-	 * @param empl запись в сущности Empl
+	 *
+	 * @param empl               запись в сущности Empl
 	 * @param employeeStaffDatas кадровые данные по сотруднику из LN
 	 * @return массив кадровых  атрибутов для изменения
 	 * @throws Exception
@@ -1147,6 +1184,7 @@ public class DominoServiceBean implements DominoService {
 			ArrayList<String> resultList = new ArrayList<String>();
 			User emplUser = empl.getUser();
 			
+			
 			String position = employeeStaffDatas.getPost();
 			ArrayList<String> orgUnitesArrayList = (ArrayList<String>) employeeStaffDatas.getOrgUnitsList();
 			Employee emplChief = employeeStaffDatas.getChief();
@@ -1154,59 +1192,227 @@ public class DominoServiceBean implements DominoService {
 			if (emplChief != null) {
 				String chiefName = emplChief.getCommonDatas().getNotesName();
 				
-				Empl chief  = empl.getChief();
+				Empl chief = empl.getChief();
 				if (chief != null) {
-					if (! chiefName.equalsIgnoreCase(chief.getNotesname())) {
+					if (!StringUtils.equalsIgnoreCase(chiefName, chief.getNotesname())) {
 						resultList.add("CHIEF");
 					}
 				}
 			}
-			
-			if (! position.equalsIgnoreCase(emplUser.getPosition())) {
+			if (!StringUtils.equalsIgnoreCase(position, emplUser.getPosition())) {
 				resultList.add("POSITION");
 			}
-			
 			
 			List<OrgUnit> orgunits = empl.getOrgunits();
 			
 			for (OrgUnit orgUnit : orgunits) {
 				String orgUnitExtId = orgUnit.getExtid();
-				if (! orgUnitesArrayList.contains(orgUnitExtId)) {
+				if (!orgUnitesArrayList.contains(orgUnitExtId)) {
 					resultList.add("ORGUNIT");
 				}
 			}
 			
 			return resultList;
-		} catch (Exception e ) {
+		} catch (Exception e) {
+			e.printStackTrace();
 			throw new Exception("Error getStaffUpdateAttributesList: \n" +
-					e.getLocalizedMessage());
+					e.getMessage());
 		}
 		
 	}
 	
 	
-	private ArrayList<String> getPlacementUpdateAttributesList (Empl empl ,
-	                                                            Placement emplPlacement) throws Exception {
+	private ArrayList<String> getPlacementUpdateAttributesList(Empl empl,
+	                                                           Placement emplPlacement) throws Exception {
 		try {
 			ArrayList<String> resulList = new ArrayList<>();
 			
 			Branch emplBranch = empl.getBranch();
 			if (emplBranch != null) {
+				
 				String emplBranchCode = emplBranch.getCode();
-				if (! emplBranchCode.equalsIgnoreCase(emplPlacement.getBranchCode())) {
+				if (!StringUtils.equalsIgnoreCase(emplBranchCode, emplPlacement.getBranchCode())) {
 					resulList.add("BRANCH");
 				}
 			}
 			
 			String city = empl.getCity();
+			if (!StringUtils.equalsIgnoreCase(city, emplPlacement.getCity())) {
+				resulList.add("CITY");
+			}
 			
+			String phone = empl.getPhone();
+			if (!StringUtils.equalsIgnoreCase(phone, emplPlacement.getPhone())) {
+				resulList.add("PHONE");
+			}
+			
+			String office = empl.getOffice();
+			if (!StringUtils.equalsIgnoreCase(office, emplPlacement.getOffice())) {
+				resulList.add("OFFICE");
+			}
+			
+			String extPhone = empl.getExtphone();
+			if (!StringUtils.equalsIgnoreCase(extPhone, emplPlacement.getExtPhone())) {
+				resulList.add("EXTPHONE");
+			}
+			
+			String mobilePhone = empl.getMobilephone();
+			String employeeMobile = emplPlacement.getMobilePhone();
+			if (employeeMobile.isEmpty()) employeeMobile = null;
+			if (!StringUtils.equalsIgnoreCase(mobilePhone, employeeMobile)) {
+				resulList.add("MOBILEPHONE");
+			}
+			
+			String room = empl.getRoom();
+			String employeeRoom = emplPlacement.getRoom();
+			if (employeeRoom.isEmpty()) employeeRoom = null;
+			if (!StringUtils.equalsIgnoreCase(room, employeeRoom)) {
+				resulList.add("ROOM");
+			}
 			
 			return resulList;
-		}catch (Exception e){
-			throw new Exception("Error getStaffUpdateAttributesList: \n" +
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Error getPlacementUpdateAttributesList: \n" +
+					e.getMessage());
+		}
+	}
+	
+	/**
+	 * Обновление атрибутов сотрудника
+	 *
+	 * @param updateAttrsArrayList массив атрибутов для обновления
+	 * @param empl                 запись по сотруднику в сущности Empl
+	 * @param employee             данные по сотруднику из LN
+	 */
+	@Transactional
+	private void updateEmplAttributes(Empl empl, Employee employee,
+	                                  ArrayList<String> updateAttrsArrayList) throws Exception {
+		try {
+			
+			User emplUser = empl.getUser();
+			for (String updateAttributeName : updateAttrsArrayList) {
+				this.updateEmplAttribute(updateAttributeName, empl, emplUser, employee);
+			}
+			
+			txDataManager.save(emplUser);
+			txDataManager.save(empl);
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Error updateEmplAttributes: \n" +
 					e.getLocalizedMessage());
 		}
 		
-		
+	}
+	
+	private void updateEmplAttribute(String attributeName, Empl empl, User emplUser, Employee employee) throws Exception {
+		try {
+			String emplFullName = employee.getCommonDatas().getLastName() + " " +
+					employee.getCommonDatas().getFirstName() + " " +
+					employee.getCommonDatas().getMiddleName();
+			
+			switch (attributeName) {
+				
+				case "SEX":
+					Sex sex = Sex.fromId(employee.getCommonDatas().getSex());
+					if (sex != null) {
+						logger.info("Обновляем пол");
+						empl.setSex(sex);
+					}
+					break;
+				case "NOTESNAME":
+					logger.info("Обновленеи notes-имени");
+					empl.setNotesname(employee.getCommonDatas().getNotesName());
+					break;
+				case "EMAIL":
+					logger.info("Обновление email");
+					emplUser.setEmail(employee.getCommonDatas().getEmail());
+					break;
+				case "LASTNAME":
+					logger.info("Обновление фамилиии");
+					emplUser.setLastName(employee.getCommonDatas().getLastName());
+					emplUser.setName(emplFullName);
+					break;
+				case "FIRSTNAME":
+					logger.info("Обновление имени");
+					emplUser.setFirstName(employee.getCommonDatas().getFirstName());
+					emplUser.setName(emplFullName);
+					break;
+				case "MIDDLENAME":
+					logger.info("Обновление отчества");
+					emplUser.setMiddleName(employee.getCommonDatas().getMiddleName());
+					emplUser.setName(emplFullName);
+					break;
+				case "POSITION":
+					logger.info("Обновление должности");
+					emplUser.setPosition(employee.getStaffDatas().getPost());
+					break;
+				case "CITY":
+					logger.info("Обновление города");
+					empl.setCity(employee.getPlacement().getCity());
+					break;
+				case "PHONE":
+					logger.info("Обновление телефона");
+					empl.setPhone(employee.getPlacement().getPhone());
+					break;
+				case "EXTPHONE":
+					logger.info("Обновление добавочного телефона");
+					empl.setExtphone(employee.getPlacement().getExtPhone());
+					break;
+				case "MOBILEPHONE":
+					logger.info("Обновление мобильного телефона");
+					empl.setMobilephone(employee.getPlacement().getMobilePhone());
+					break;
+				
+				case "ROOM":
+					logger.info("Обновление номера комнаты");
+					empl.setRoom(employee.getPlacement().getRoom());
+					break;
+				case "OFFICE":
+					logger.info("Обновление офиса");
+					empl.setOffice(employee.getPlacement().getOffice());
+					break;
+				case "CHIEF":
+					Empl emplChief = emplService.getEmplbyOuterEmployee(employee.getStaffDatas().getChief());
+					if (emplChief != null) {
+						logger.info("Обновление руководителя");
+						empl.setChief(emplChief);
+					}
+					break;
+				
+				case "ORGUNIT":
+					ArrayList<String> employeeOrgUnitsList = (ArrayList<String>)
+							employee.getStaffDatas().getOrgUnitsList();
+					List<OrgUnit> unitList = this.getEmplOrgUnitList(employeeOrgUnitsList);
+					if (!unitList.isEmpty()) {
+						logger.info("Обновление подраздедений");
+						empl.setOrgunits(unitList);
+					}
+					break;
+				
+				case "BRANCH":
+					String branchCode = employee.getPlacement().getBranchCode();
+					
+					Branch emplBranch = this.getBranchByCode(branchCode);
+					if (emplBranch != null) {
+						logger.info("Обновление филиала");
+						empl.setBranch(emplBranch);
+					}
+					break;
+				
+				case "PHOTO":
+					FileDescriptor descriptor = this.getPhotoDescriptor(employee.getPhotoDatas());
+					if (descriptor != null) {
+						logger.info("Обновление фото сотрудника");
+						empl.setPhoto(descriptor);
+					}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Error updateEmplAttribute: \n" +
+					e.getMessage());
+		}
 	}
 }
