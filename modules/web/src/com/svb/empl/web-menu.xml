@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
-    <menu id="application-empl" insertBefore="administration" >
+    <menu description="" icon="" id="application-empl" insertBefore="administration">
         <item screen="empl_Post.browse" />
-        <item screen="empl_Branch.browse"/>
-        <item screen="empl_Empl.browse"/>
-        <item screen="empl_OrgUnit.browse"/>
+        <item screen="empl_Branch.browse" description="" icon=""/>
+        <item screen="empl_Empl.browse" description="" icon=""/>
+        <item screen="empl_OrgUnit.browse" description="" icon=""/>
+
     </menu>
 </menu-config>

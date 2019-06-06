@@ -15,9 +15,11 @@ import com.haulmont.cuba.gui.model.CollectionPropertyContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
+import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.theme.HaloTheme;
 import com.svb.empl.entity.Empl;
 import com.svb.empl.entity.OrgUnit;
+import com.svb.empl.service.EmplService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +58,27 @@ public class EmplEdit extends StandardEditor<Empl> {
 	@Inject
 	private Messages messages;
 	
+	@Inject
+	private UiComponents uiComponents;
 	
+	@Inject
+	private Form form;
+	
+	@Inject
+	private UserSession userSession;
+	@Inject
+	private EmplService emplService;
 	
 	@Subscribe
 	private void onInitEntity(InitEntityEvent<Empl> event) {
-	
+	    try{
+		  
+		    
+	    } catch (Exception e) {
+	    	logger.error("EmplEdit onInitEntity error \n"+e.getMessage());
+		    throw new RuntimeException(e.getMessage());
+	    }
+		
 	}
 	
 	@Override
@@ -80,14 +98,11 @@ public class EmplEdit extends StandardEditor<Empl> {
 
 	}
 	
-	@Inject
-	private UiComponents uiComponents;
-	
-	@Inject
-	private Form form;
+
 	
 	@Subscribe
 	private void onBeforeShow(BeforeShowEvent event) {
+		
 		
 		Empl empl = getEditedEntity();
 		if (! PersistenceHelper.isLoadedWithView(empl,"empl-view_1")) {
@@ -129,6 +144,7 @@ public class EmplEdit extends StandardEditor<Empl> {
 			
 			
 			
+			
 			// Подразделения
 			List<OrgUnit> orgUnitList = empl.getOrgunits();
 			
@@ -156,11 +172,11 @@ public class EmplEdit extends StandardEditor<Empl> {
 			orgUnitsTree.expandTree();
 			
 			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("onBeforeShow: "+
 					e.getMessage());
+			
 		}
 	}
 	
